@@ -64,10 +64,10 @@ func populateMaps(data *inputData) {
 	data.eventsMap = make(map[string]reducedEvent)
 	data.deadlinesMap = make(map[string]reducedDeadline)
 	for _, event := range data.Events {
-		data.eventsMap[event.Name] = reducedEvent{startTime: event.StartTime, endTime: event.EndTime}
+		data.eventsMap[event.Name] = reducedEvent{event.StartTime, event.EndTime}
 	}
 	for _, deadline := range data.Deadlines {
-		data.deadlinesMap[deadline.Name] = reducedDeadline{minutesRemaining: deadline.MinutesRemaining, deadline: deadline.Deadline}
+		data.deadlinesMap[deadline.Name] = reducedDeadline{deadline.MinutesRemaining, deadline.Deadline}
 	}
 }
 
@@ -105,7 +105,7 @@ func checkEvents(events []event, eventsMap map[string]reducedEvent) {
 		return
 	}
 	// data are sorted, so check first event
-	if events[0].StartTime.Before(currentTime) {
+	if events[0].EndTime.Before(currentTime) {
 		log.Fatalf("found an event %s that has already passed", events[0].Name)
 	}
 
