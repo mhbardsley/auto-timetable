@@ -50,11 +50,9 @@ func getInput(filePtr *string) (data inputData) {
 		log.Fatal("error making sense of input file: ", err)
 	}
 
+	sortData(data)
 	// populate the maps
 	populateMaps(&data)
-
-	// check and sort it
-	sortData(data)
 	checkData(data)
 	return data
 }
@@ -72,6 +70,7 @@ func populateMaps(data *inputData) {
 }
 
 // sortData sorts events and deadlines by start date and upcoming date, respectively
+// it also does rounding
 func sortData(data inputData) {
 	sortEvents(data.Events)
 	sortDeadlines(data.Deadlines)
@@ -85,6 +84,10 @@ func checkData(data inputData) {
 
 // sortEvents to sort by start time
 func sortEvents(events []event) {
+	for _, event := range events {
+		event.StartTime = roundDown(event.StartTime)
+		event.EndTime = roundUp(event.EndTime)
+	}
 	sort.Slice(events, func(p, q int) bool {
 		return events[p].StartTime.Before(events[q].StartTime)
 	})
@@ -92,6 +95,9 @@ func sortEvents(events []event) {
 
 // sortDeadlines to sort by deadline
 func sortDeadlines(deadlines []deadline) {
+	for _, deadline := range deadlines {
+		deadline.Deadline = roundDown(deadline.Deadline)
+	}
 	sort.Slice(deadlines, func(p, q int) bool {
 		return deadlines[p].Deadline.Before(deadlines[q].Deadline)
 	})

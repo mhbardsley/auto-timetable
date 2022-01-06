@@ -29,23 +29,6 @@ func getEmptyTimetable(deadlines []deadline) (timetable []timetableElement) {
 
 // return the number of segments between time1 (rounded up) and time2 (rounded down)
 func segmentsBetween(time1 time.Time, time2 time.Time) int {
-	roundedT1 := roundUp(time1)
-	roundedT2 := roundDown(time2)
-
-	durationBetween := roundedT2.Sub(roundedT1)
+	durationBetween := time2.Sub(time1)
 	return (int)(durationBetween.Minutes() / 30)
-}
-
-// roundUp rounds a time up to its nearest 30-minute point
-func roundUp(unrounded time.Time) (rounded time.Time) {
-	rounded = unrounded.Truncate(30 * time.Minute)
-	if unrounded == rounded {
-		return rounded
-	}
-	return rounded.Add(30 * time.Minute)
-}
-
-// roundDown rounds a time down to its nearest 30-minute point
-func roundDown(unrounded time.Time) time.Time {
-	return unrounded.Truncate(30 * time.Minute)
 }
