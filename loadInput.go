@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
+	"sort"
 	"time"
 )
 
@@ -36,5 +37,28 @@ func getInput(filePtr *string) (data inputData) {
 	if err != nil {
 		log.Fatal("error making sense of input file: ", err)
 	}
+
+	// sort it
+	sortData(data)
 	return data
+}
+
+// sortData sorts events and deadlines by start date and upcoming date, respectively
+func sortData(data inputData) {
+	sortEvents(data.Events)
+	sortDeadlines(data.Deadlines)
+}
+
+// sortEvents to sort by start time
+func sortEvents(events []event) {
+	sort.Slice(events, func(p, q int) bool {
+		return events[p].StartTime.Before(events[q].StartTime)
+	})
+}
+
+// sortDeadlines to sort by deadline
+func sortDeadlines(deadlines []deadline) {
+	sort.Slice(deadlines, func(p, q int) bool {
+		return deadlines[p].Deadline.Before(deadlines[q].Deadline)
+	})
 }
