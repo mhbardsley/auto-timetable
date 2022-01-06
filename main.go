@@ -1,9 +1,13 @@
 package main
 
 import (
-	"fmt"
+	"flag"
+	"log"
 )
 
 func main() {
-	fmt.Println("Hello, World")
+	filePtr := flag.String("f", "input.json", "The input's filename")
+	inputData := getInput(filePtr)
+
+	log.Println(inputData)
 }
