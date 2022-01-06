@@ -84,9 +84,9 @@ func checkData(data inputData) {
 
 // sortEvents to sort by start time
 func sortEvents(events []event) {
-	for _, event := range events {
-		event.StartTime = roundDown(event.StartTime)
-		event.EndTime = roundUp(event.EndTime)
+	for i, event := range events {
+		events[i].StartTime = roundDown(event.StartTime)
+		events[i].EndTime = roundUp(event.EndTime)
 	}
 	sort.Slice(events, func(p, q int) bool {
 		return events[p].StartTime.Before(events[q].StartTime)
@@ -95,8 +95,8 @@ func sortEvents(events []event) {
 
 // sortDeadlines to sort by deadline
 func sortDeadlines(deadlines []deadline) {
-	for _, deadline := range deadlines {
-		deadline.Deadline = roundDown(deadline.Deadline)
+	for i, deadline := range deadlines {
+		deadlines[i].Deadline = roundDown(deadline.Deadline)
 	}
 	sort.Slice(deadlines, func(p, q int) bool {
 		return deadlines[p].Deadline.Before(deadlines[q].Deadline)
