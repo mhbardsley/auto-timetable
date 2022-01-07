@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
+	"math"
 	"sort"
 	"time"
 )
@@ -22,6 +23,8 @@ type reducedEvent struct {
 type deadline struct {
 	Name             string    `json:"name"`
 	MinutesRemaining float64   `json:"minutesRemaining"`
+	slotsRemaining   int       `json:"-"`
+	slotsAvailable   int       `json:"-"`
 	Deadline         time.Time `json:"deadline"`
 }
 
@@ -96,6 +99,7 @@ func sortEvents(events []event) {
 // sortDeadlines to sort by deadline
 func sortDeadlines(deadlines []deadline) {
 	for i, deadline := range deadlines {
+		deadlines[i].MinutesRemaining = math.Ceil(deadline.MinutesRemaining/30) * 30
 		deadlines[i].Deadline = roundDown(deadline.Deadline)
 	}
 	sort.Slice(deadlines, func(p, q int) bool {

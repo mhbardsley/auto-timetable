@@ -21,6 +21,8 @@ func generateTimetable(data inputData) {
 	fillWithEvents(timetable, data.Events)
 	log.Println("Timetable filled with events:")
 	log.Printf("%s", printTimetable(timetable))
+
+	fillDeadlines(timetable, data.Deadlines)
 }
 
 // generate a slice of timetable elements
@@ -60,6 +62,32 @@ func fillWithEvents(timetable []timetableElement, events []event) {
 			log.Println("Event added to timetable: ", event.Name, " with address", selectedElements[j].event)
 		}
 	}
+}
+
+// function to fill deadlines with how many remain and are available
+func fillDeadlines(timetable []timetableElement, deadlines []deadline) {
+	var startIndex int
+	var endIndex int
+	var currentSlots int
+	startIndex = 0
+	for i, deadline := range deadlines {
+		deadlines[i].slotsRemaining = int(deadline.MinutesRemaining / 30)
+		endIndex = segmentsBetween(currentTime, deadline.Deadline) - startIndex
+		currentSlots = freeSlotsBetween(timetable[startIndex:endIndex])
+		deadlines[i].slotsAvailable = currentSlots
+		startIndex = endIndex
+	}
+}
+
+// calculate the number of free slots in the timetable slice
+func freeSlotsBetween(timetablePart []timetableElement) int {
+	count := 0
+	for _, slot := range timetablePart {
+		if slot.event == nil {
+			count++
+		}
+	}
+	return count
 }
 
 // function to print the timetable as-is
