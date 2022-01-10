@@ -23,6 +23,17 @@ func generateTimetable(data inputData) {
 	log.Printf("%s", printTimetable(timetable))
 
 	fillDeadlines(timetable, data.Deadlines)
+	log.Println("Deadlines populated: ", data.Deadlines)
+
+	log.Println("Is a valid timetabling possible? ", possibleTimetabling(data.Deadlines))
+	// if a timetabling is not possible, stop
+	if !possibleTimetabling(data.Deadlines) {
+		log.Fatal("There's too little time! Please reduce the number of events or deadlines or extend them")
+	}
+
+	// otherwise, we loop in a random to probabilistic assignment
+	fillTimetable(timetable, data.Deadlines)
+	log.Println("Actual deadlines populated: ", data.Deadlines)
 }
 
 // generate a slice of timetable elements
@@ -70,13 +81,29 @@ func fillDeadlines(timetable []timetableElement, deadlines []deadline) {
 	var endIndex int
 	var currentSlots int
 	startIndex = 0
+	runningTotal := 0
 	for i, deadline := range deadlines {
 		deadlines[i].slotsRemaining = int(deadline.MinutesRemaining / 30)
-		endIndex = segmentsBetween(currentTime, deadline.Deadline) - startIndex
+		endIndex = segmentsBetween(currentTime, deadline.Deadline)
 		currentSlots = freeSlotsBetween(timetable[startIndex:endIndex])
-		deadlines[i].slotsAvailable = currentSlots
+		runningTotal += currentSlots
+		deadlines[i].slotsAvailable = runningTotal
 		startIndex = endIndex
 	}
+}
+
+// check that a timetabling is possible
+func possibleTimetabling(deadlines []deadline) bool {
+	runningTotal := 0
+	for _, deadline := range deadlines {
+		runningTotal += deadline.slotsRemaining
+		log.Printf("Need to fit %d slots into %d available", runningTotal, deadline.slotsAvailable)
+		log.Println()
+		if runningTotal > deadline.slotsAvailable {
+			return false
+		}
+	}
+	return true
 }
 
 // calculate the number of free slots in the timetable slice
