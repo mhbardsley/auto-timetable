@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"math"
 	"math/rand"
 )
@@ -10,7 +9,6 @@ import (
 // assume that it is possible
 func fillTimetable(timetable []timetableElement, deadlines []deadline) {
 	for i := 0; ; i++ {
-		log.Println(i)
 		// need to construct a slice of weights
 		if hasFilled(timetable, deadlines, i) {
 			break

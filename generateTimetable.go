@@ -16,16 +16,11 @@ type timetableElement struct {
 // function to generate the timetable
 func generateTimetable(data inputData) {
 	timetable := getEmptyTimetable(data.Deadlines)
-	log.Println("Number of 30-minute segments in timetable: ", len(timetable))
 
 	fillWithEvents(timetable, data.Events)
-	log.Println("Timetable filled with events:")
-	log.Printf("%s", printTimetable(timetable))
 
 	fillDeadlines(timetable, data.Deadlines)
-	log.Println("Deadlines populated: ", data.Deadlines)
 
-	log.Println("Is a valid timetabling possible? ", possibleTimetabling(data.Deadlines))
 	// if a timetabling is not possible, stop
 	if !possibleTimetabling(data.Deadlines) {
 		log.Fatal("There's too little time! Please reduce the number of events or deadlines or extend them")
@@ -33,8 +28,8 @@ func generateTimetable(data inputData) {
 
 	// otherwise, we loop in a random to probabilistic assignment
 	fillTimetable(timetable, data.Deadlines)
-	log.Println("Actual timetable: ")
-	log.Println(printTimetable(timetable))
+	fmt.Printf("%s", printTimetable(timetable))
+
 }
 
 // generate a slice of timetable elements
@@ -71,7 +66,6 @@ func fillWithEvents(timetable []timetableElement, events []event) {
 		selectedElements = timetable[startIndex:endIndex]
 		for j := range selectedElements {
 			selectedElements[j].event = &(events[i].Name)
-			log.Println("Event added to timetable: ", event.Name, " with address", selectedElements[j].event)
 		}
 	}
 }
@@ -122,7 +116,6 @@ func printTimetable(timetable []timetableElement) string {
 	for i, slot := range timetable {
 		builder.WriteString(fmt.Sprintf("%s-%s: ", (currentTime.Add(time.Duration(i*30) * time.Minute)).Format("Jan 2 15:04"), (currentTime.Add(time.Duration((i+1)*30) * time.Minute)).Format("Jan 2 15:04")))
 		if slot.event != nil {
-			log.Println("Event pointed to has address: ", slot.event)
 			builder.WriteString(fmt.Sprintf("[EVENT] %s", *(slot.event)))
 		} else if slot.deadline != nil {
 			builder.WriteString(fmt.Sprintf("[DEADLINE] %s", *(slot.deadline)))

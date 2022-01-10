@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"log"
 	"math/rand"
 	"time"
 )
@@ -14,7 +13,6 @@ func main() {
 	rand.Seed(time.Now().Unix())
 	filePtr := flag.String("f", "input.json", "The input's filename")
 	inputData := getInput(filePtr)
-	log.Println("Input data: ", inputData)
 
 	generateTimetable(inputData)
 }
