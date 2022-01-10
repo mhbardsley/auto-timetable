@@ -33,7 +33,8 @@ func generateTimetable(data inputData) {
 
 	// otherwise, we loop in a random to probabilistic assignment
 	fillTimetable(timetable, data.Deadlines)
-	log.Println("Actual deadlines populated: ", data.Deadlines)
+	log.Println("Actual timetable: ")
+	log.Println(printTimetable(timetable))
 }
 
 // generate a slice of timetable elements
@@ -97,8 +98,6 @@ func possibleTimetabling(deadlines []deadline) bool {
 	runningTotal := 0
 	for _, deadline := range deadlines {
 		runningTotal += deadline.slotsRemaining
-		log.Printf("Need to fit %d slots into %d available", runningTotal, deadline.slotsAvailable)
-		log.Println()
 		if runningTotal > deadline.slotsAvailable {
 			return false
 		}
