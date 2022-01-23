@@ -15,11 +15,6 @@ type event struct {
 	EndTime   time.Time `json:"endTime"`
 }
 
-type reducedEvent struct {
-	startTime time.Time
-	endTime   time.Time
-}
-
 type deadline struct {
 	Name             string    `json:"name"`
 	MinutesRemaining float64   `json:"minutesRemaining"`
@@ -28,16 +23,9 @@ type deadline struct {
 	Deadline         time.Time `json:"deadline"`
 }
 
-type reducedDeadline struct {
-	minutesRemaining float64
-	deadline         time.Time
-}
-
 type inputData struct {
-	Events       []event                    `json:"events"`
-	Deadlines    []deadline                 `json:"deadlines"`
-	eventsMap    map[string]reducedEvent    `json:"-"`
-	deadlinesMap map[string]reducedDeadline `json:"-"`
+	Events    []event    `json:"events"`
+	Deadlines []deadline `json:"deadlines"`
 }
 
 // this function will read the JSON file into the structs
@@ -54,22 +42,8 @@ func getInput(filePtr *string) (data inputData) {
 	}
 
 	sortData(data)
-	// populate the maps
-	populateMaps(&data)
 	checkData(data)
 	return data
-}
-
-// populateMaps populates eventsMap and deadlinesMap with the relevant data from slices already populated
-func populateMaps(data *inputData) {
-	data.eventsMap = make(map[string]reducedEvent)
-	data.deadlinesMap = make(map[string]reducedDeadline)
-	for _, event := range data.Events {
-		data.eventsMap[event.Name] = reducedEvent{event.StartTime, event.EndTime}
-	}
-	for _, deadline := range data.Deadlines {
-		data.deadlinesMap[deadline.Name] = reducedDeadline{deadline.MinutesRemaining, deadline.Deadline}
-	}
 }
 
 // sortData sorts events and deadlines by start date and upcoming date, respectively
@@ -81,8 +55,8 @@ func sortData(data inputData) {
 
 // checkData checks the validity of the data
 func checkData(data inputData) {
-	checkEvents(data.Events, data.eventsMap)
-	checkDeadlines(data.Deadlines, data.deadlinesMap)
+	checkEvents(data.Events)
+	checkDeadlines(data.Deadlines)
 }
 
 // sortEvents to sort by start time
@@ -99,7 +73,7 @@ func sortEvents(events []event) {
 // sortDeadlines to sort by deadline
 func sortDeadlines(deadlines []deadline) {
 	for i, deadline := range deadlines {
-		deadlines[i].MinutesRemaining = math.Ceil(deadline.MinutesRemaining/30) * 30
+		deadlines[i].MinutesRemaining = math.Ceil(deadline.MinutesRemaining/25) * 25
 		deadlines[i].Deadline = roundDown(deadline.Deadline)
 	}
 	sort.Slice(deadlines, func(p, q int) bool {
@@ -109,7 +83,7 @@ func sortDeadlines(deadlines []deadline) {
 
 // checkEvents will ensure events all start in the future, have an end date after start date
 // and do not intersect
-func checkEvents(events []event, eventsMap map[string]reducedEvent) {
+func checkEvents(events []event) {
 	// if events are empty, it is trivial that they are compliant
 	if len(events) == 0 {
 		return
@@ -135,21 +109,12 @@ func checkEvents(events []event, eventsMap map[string]reducedEvent) {
 			log.Fatalf("found an event %s with start time before event %s ends", events[i+1].Name, events[i].Name)
 		}
 	}
-
-	// finally check that the lengths of the maps and slices are the same
-	if len(events) != len(eventsMap) {
-		log.Fatal("there are events with the same name")
-	}
 }
 
 // checkDeadlines will ensure deadlines are in the future
-func checkDeadlines(deadlines []deadline, deadlinesMap map[string]reducedDeadline) {
+func checkDeadlines(deadlines []deadline) {
 	// since we assume data are sorted, just check the first deadline
 	if len(deadlines) > 0 && deadlines[0].Deadline.Before(currentTime) {
 		log.Fatalf("found a deadline %s that has already passed", deadlines[0].Name)
-	}
-	// finally check that the lengths of the maps and slices are the same
-	if len(deadlines) != len(deadlinesMap) {
-		log.Fatal("there are deadlines with the same name")
 	}
 }

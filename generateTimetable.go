@@ -61,7 +61,7 @@ func fillWithEvents(timetable []timetableElement, events []event) {
 		if segmentsBetween(currentTime, event.StartTime) >= len(timetable) {
 			break
 		}
-		startIndex = segmentsBetween(currentTime, event.StartTime)
+		startIndex = int(math.Max(0, float64(segmentsBetween(currentTime, event.StartTime))))
 		endIndex = int(math.Min(float64(segmentsBetween(currentTime, event.EndTime)), float64(len(timetable))))
 		selectedElements = timetable[startIndex:endIndex]
 		for j := range selectedElements {
@@ -78,7 +78,7 @@ func fillDeadlines(timetable []timetableElement, deadlines []deadline) {
 	startIndex = 0
 	runningTotal := 0
 	for i, deadline := range deadlines {
-		deadlines[i].slotsRemaining = int(deadline.MinutesRemaining / 30)
+		deadlines[i].slotsRemaining = int(deadline.MinutesRemaining / 25)
 		endIndex = segmentsBetween(currentTime, deadline.Deadline)
 		currentSlots = freeSlotsBetween(timetable[startIndex:endIndex])
 		runningTotal += currentSlots
@@ -114,11 +114,15 @@ func freeSlotsBetween(timetablePart []timetableElement) int {
 func printTimetable(timetable []timetableElement) string {
 	builder := strings.Builder{}
 	for i, slot := range timetable {
-		builder.WriteString(fmt.Sprintf("%s-%s: ", (currentTime.Add(time.Duration(i*30) * time.Minute)).Format("Jan 2 15:04"), (currentTime.Add(time.Duration((i+1)*30) * time.Minute)).Format("Jan 2 15:04")))
+
 		if slot.event != nil {
+			builder.WriteString(fmt.Sprintf("%s-%s: ", (currentTime.Add(time.Duration(i*30) * time.Minute)).Format("Jan 2 15:04"), (currentTime.Add(time.Duration((i+1)*30) * time.Minute)).Format("Jan 2 15:04")))
 			builder.WriteString(fmt.Sprintf("[EVENT] %s", *(slot.event)))
 		} else if slot.deadline != nil {
+			builder.WriteString(fmt.Sprintf("%s-%s: ", (currentTime.Add(time.Duration(i*30) * time.Minute)).Format("Jan 2 15:04"), (currentTime.Add(time.Duration((i+1)*30-5) * time.Minute)).Format("Jan 2 15:04")))
 			builder.WriteString(fmt.Sprintf("[DEADLINE] %s", *(slot.deadline)))
+			builder.WriteString(fmt.Sprintln())
+			builder.WriteString(fmt.Sprintf("%s-%s: 5 minute break", (currentTime.Add(time.Duration(i+1*30-5) * time.Minute)).Format("Jan 2 15:04"), (currentTime.Add(time.Duration((i+1)*30) * time.Minute)).Format("Jan 2 15:04")))
 		}
 		builder.WriteString(fmt.Sprintln())
 	}
