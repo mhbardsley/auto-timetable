@@ -15,6 +15,8 @@ func main() {
 	filePtr := flag.String("f", "input.json", "The input's filename")
 	slotsPtr := flag.String("s", "48", "The number of slots to display")
 
+	flag.Parse()
+
 	noOfSlots, _ := strconv.Atoi(*slotsPtr)
 	inputData := getInput(filePtr, noOfSlots)
 
