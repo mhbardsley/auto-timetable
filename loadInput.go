@@ -26,10 +26,11 @@ type deadline struct {
 type inputData struct {
 	Events    []event    `json:"events"`
 	Deadlines []deadline `json:"deadlines"`
+	slots     int        `json:"-"`
 }
 
 // this function will read the JSON file into the structs
-func getInput(filePtr *string) (data inputData) {
+func getInput(filePtr *string, noOfSlots int) (data inputData) {
 	dataRaw, err := ioutil.ReadFile(*filePtr)
 	if err != nil {
 		log.Fatal("error opening file: ", err)
@@ -43,6 +44,7 @@ func getInput(filePtr *string) (data inputData) {
 
 	sortData(data)
 	checkData(data)
+	data.slots = noOfSlots
 	return data
 }
 

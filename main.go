@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"math/rand"
+	"strconv"
 	"time"
 )
 
@@ -12,7 +13,10 @@ var currentTime time.Time = roundUp(time.Now())
 func main() {
 	rand.Seed(time.Now().Unix())
 	filePtr := flag.String("f", "input.json", "The input's filename")
-	inputData := getInput(filePtr)
+	slotsPtr := flag.String("s", "48", "The number of slots to display")
+
+	noOfSlots, _ := strconv.Atoi(*slotsPtr)
+	inputData := getInput(filePtr, noOfSlots)
 
 	generateTimetable(inputData)
 }
