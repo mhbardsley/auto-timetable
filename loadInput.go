@@ -30,7 +30,7 @@ type inputData struct {
 }
 
 // this function will read the JSON file into the structs
-func getInput(filePtr *string, noOfSlots int) (data inputData) {
+func getInput(filePtr *string, noOfSlots int, popSlots int) (data inputData) {
 	dataRaw, err := ioutil.ReadFile(*filePtr)
 	if err != nil {
 		log.Fatal("error opening file: ", err)
@@ -40,6 +40,11 @@ func getInput(filePtr *string, noOfSlots int) (data inputData) {
 	err = json.Unmarshal(dataRaw, &data)
 	if err != nil {
 		log.Fatal("error making sense of input file: ", err)
+	}
+
+	// add a mandatory deadline to update the timetable
+	if popSlots > 0 {
+		data.Deadlines = append(data.Deadlines, deadline{Name: "Populate with deadlines and events", MinutesRemaining: float64(popSlots * 25), Deadline: time.Now().Add(time.Hour * 24)})
 	}
 
 	sortData(data)
