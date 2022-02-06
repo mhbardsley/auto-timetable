@@ -42,11 +42,12 @@ func getInput(filePtr *string, noOfSlots int, popSlots int) (data inputData) {
 		log.Fatal("error making sense of input file: ", err)
 	}
 
-	// add a mandatory deadline to update the timetable
-	if popSlots > 0 {
-		data.Deadlines = append(data.Deadlines, deadline{Name: "Populate with deadlines and events", MinutesRemaining: float64(popSlots * 25), Deadline: time.Now().Add(time.Hour * 24)})
+	sortData(data)
+	noOfDeadlines := len(data.Deadlines)
+	// now add meta deadlines up to the final one
+	for curr := currentTime.Add(time.Duration(popSlots) * time.Hour); curr.Before(data.Deadlines[noOfDeadlines-1].Deadline); curr = curr.Add(time.Duration(popSlots) * time.Hour) {
+		data.Deadlines = append(data.Deadlines, deadline{Name: "Populate with deadlines and events", MinutesRemaining: 25, Deadline: curr})
 	}
-
 	sortData(data)
 	checkData(data)
 	data.slots = noOfSlots

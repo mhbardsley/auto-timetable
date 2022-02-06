@@ -128,7 +128,7 @@ func printTimetable(timetable []timetableElement, noOfSlots int) string {
 			builder.WriteString(fmt.Sprintln())
 			builder.WriteString(fmt.Sprintf("%s-%s: 5 minute break", (currentTime.Add(time.Duration((i+1)*30-5) * time.Minute)).Format("Jan 2 15:04"), (currentTime.Add(time.Duration((i+1)*30) * time.Minute)).Format("Jan 2 15:04")))
 		default:
-			builder.WriteString(fmt.Sprintf("%s-%s: FREE SLOT", (currentTime.Add(time.Duration(i*30) * time.Minute)).Format("Jan 2 15:04"), (currentTime.Add(time.Duration((i+1)*30) * time.Minute)).Format("Jan 2 15:04")))
+			builder.WriteString(fmt.Sprintf("%s-%s: FREE SLOT - please populate with deadlines and events", (currentTime.Add(time.Duration(i*30) * time.Minute)).Format("Jan 2 15:04"), (currentTime.Add(time.Duration((i+1)*30) * time.Minute)).Format("Jan 2 15:04")))
 		}
 		builder.WriteString(fmt.Sprintln())
 	}

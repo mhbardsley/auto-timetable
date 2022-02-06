@@ -14,7 +14,7 @@ func main() {
 	rand.Seed(time.Now().Unix())
 	filePtr := flag.String("f", "input.json", "The input's filename")
 	slotsPtr := flag.String("s", "48", "The number of slots to display")
-	popPtr := flag.String("p", "1", "The number of slots to be spent per-day to amend/populate with new events and deadlines")
+	popPtr := flag.String("p", "8", "Max frequency in hours with which the user should update deadlines and events")
 
 	flag.Parse()
 
