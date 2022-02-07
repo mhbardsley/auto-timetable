@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"math/rand"
 	"strings"
 	"time"
 )
@@ -11,11 +12,14 @@ import (
 type timetableElement struct {
 	event    *string
 	deadline *string
+	meta     bool
 }
 
 // function to generate the timetable
 func generateTimetable(data inputData) {
-	timetable := getEmptyTimetable(data.Deadlines, data.slots)
+	timetable := getEmptyTimetable(data.Deadlines, data.Events, data.slots)
+
+	fillWithMeta(timetable)
 
 	fillWithEvents(timetable, data.Events)
 
@@ -33,15 +37,13 @@ func generateTimetable(data inputData) {
 }
 
 // generate a slice of timetable elements
-func getEmptyTimetable(deadlines []deadline, noOfSlots int) (timetable []timetableElement) {
+func getEmptyTimetable(deadlines []deadline, events []event, noOfSlots int) (timetable []timetableElement) {
 	var numberOfSpaces int
-	noOfDeadlines := len(deadlines)
-	if noOfDeadlines == 0 {
-		numberOfSpaces = 0
-	} else {
-		numberOfSpaces = segmentsBetween(currentTime, deadlines[noOfDeadlines-1].Deadline)
+	deadlinesEnd := len(deadlines)
+	if deadlinesEnd != 0 {
+		deadlinesEnd = segmentsBetween(currentTime, deadlines[deadlinesEnd-1].Deadline)
 	}
-	numberOfSpaces = int(math.Max(float64(numberOfSpaces), float64(noOfSlots)))
+	numberOfSpaces = int(math.Max(float64(deadlinesEnd), float64(noOfSlots)))
 	timetable = make([]timetableElement, numberOfSpaces)
 	return timetable
 }
@@ -50,6 +52,19 @@ func getEmptyTimetable(deadlines []deadline, noOfSlots int) (timetable []timetab
 func segmentsBetween(time1 time.Time, time2 time.Time) int {
 	durationBetween := time2.Sub(time1)
 	return (int)(durationBetween.Minutes() / 30)
+}
+
+func fillWithMeta(timetable []timetableElement) {
+	var r *rand.Rand
+	frequency := 1.0 / 12.0
+
+	for i := range timetable {
+		// re-seeding needed to make this deterministic
+		r.Seed(currentTime.Add(time.Duration(i*30) * time.Minute).Unix())
+		if r.Float64() < frequency {
+			timetable[i].meta = true
+		}
+	}
 }
 
 // fill the timetable with the events now they are assumed to be correct
@@ -104,7 +119,7 @@ func possibleTimetabling(deadlines []deadline) (noFit time.Time, possible bool) 
 func freeSlotsBetween(timetablePart []timetableElement) int {
 	count := 0
 	for _, slot := range timetablePart {
-		if slot.event == nil {
+		if slot.event == nil && !slot.meta {
 			count++
 		}
 	}

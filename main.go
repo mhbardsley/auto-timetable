@@ -14,13 +14,11 @@ func main() {
 	rand.Seed(time.Now().Unix())
 	filePtr := flag.String("f", "input.json", "The input's filename")
 	slotsPtr := flag.String("s", "48", "The number of slots to display")
-	popPtr := flag.String("p", "8", "Max frequency in hours with which the user should update deadlines and events")
 
 	flag.Parse()
 
 	noOfSlots, _ := strconv.Atoi(*slotsPtr)
-	popSlots, _ := strconv.Atoi(*popPtr)
-	inputData := getInput(filePtr, noOfSlots, popSlots)
+	inputData := getInput(filePtr, noOfSlots)
 
 	generateTimetable(inputData)
 }
