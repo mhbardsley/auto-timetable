@@ -16,10 +16,10 @@ type timetableElement struct {
 }
 
 // function to generate the timetable
-func generateTimetable(data inputData) {
+func generateTimetable(data inputData, noOfMeta float64) {
 	timetable := getEmptyTimetable(data.Deadlines, data.Events, data.slots)
 
-	fillWithMeta(timetable)
+	fillWithMeta(timetable, noOfMeta)
 
 	fillWithEvents(timetable, data.Events)
 
@@ -54,14 +54,12 @@ func segmentsBetween(time1 time.Time, time2 time.Time) int {
 	return (int)(durationBetween.Minutes() / 30)
 }
 
-func fillWithMeta(timetable []timetableElement) {
-	var r *rand.Rand
-	frequency := 1.0 / 12.0
+func fillWithMeta(timetable []timetableElement, noOfMeta float64) {
+	var generated float64
 
 	for i := range timetable {
-		// re-seeding needed to make this deterministic
-		r.Seed(currentTime.Add(time.Duration(i*30) * time.Minute).Unix())
-		if r.Float64() < frequency {
+		generated = rand.Float64()
+		if generated < noOfMeta {
 			timetable[i].meta = true
 		}
 	}
@@ -137,11 +135,17 @@ func printTimetable(timetable []timetableElement, noOfSlots int) string {
 		case timetable[i].event != nil:
 			builder.WriteString(fmt.Sprintf("%s-%s: ", (currentTime.Add(time.Duration(i*30) * time.Minute)).Format("Jan 2 15:04"), (currentTime.Add(time.Duration((i+1)*30) * time.Minute)).Format("Jan 2 15:04")))
 			builder.WriteString(fmt.Sprintf("[EVENT] %s", *(timetable[i].event)))
+			if timetable[i].meta {
+				builder.WriteString(fmt.Sprintln())
+				builder.WriteString("***Please also do 30 minutes of filling in events and deadlines. If you cannot do it now, please make up for it later on, e.g. when you have breaks***")
+			}
 		case timetable[i].deadline != nil:
 			builder.WriteString(fmt.Sprintf("%s-%s: ", (currentTime.Add(time.Duration(i*30) * time.Minute)).Format("Jan 2 15:04"), (currentTime.Add(time.Duration((i+1)*30-5) * time.Minute)).Format("Jan 2 15:04")))
 			builder.WriteString(fmt.Sprintf("[DEADLINE] %s", *(timetable[i].deadline)))
 			builder.WriteString(fmt.Sprintln())
 			builder.WriteString(fmt.Sprintf("%s-%s: 5 minute break", (currentTime.Add(time.Duration((i+1)*30-5) * time.Minute)).Format("Jan 2 15:04"), (currentTime.Add(time.Duration((i+1)*30) * time.Minute)).Format("Jan 2 15:04")))
+		case timetable[i].meta:
+			builder.WriteString(fmt.Sprintf("%s-%s: [META] Fill in events and deadlines", (currentTime.Add(time.Duration(i*30) * time.Minute)).Format("Jan 2 15:04"), (currentTime.Add(time.Duration((i+1)*30) * time.Minute)).Format("Jan 2 15:04")))
 		default:
 			builder.WriteString(fmt.Sprintf("%s-%s: FREE SLOT - please populate with deadlines and events", (currentTime.Add(time.Duration(i*30) * time.Minute)).Format("Jan 2 15:04"), (currentTime.Add(time.Duration((i+1)*30) * time.Minute)).Format("Jan 2 15:04")))
 		}

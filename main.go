@@ -11,16 +11,18 @@ import (
 var currentTime time.Time = roundUp(time.Now())
 
 func main() {
-	rand.Seed(time.Now().Unix())
+	rand.Seed(currentTime.Unix())
 	filePtr := flag.String("f", "input.json", "The input's filename")
 	slotsPtr := flag.String("s", "48", "The number of slots to display")
+	metaPtr := flag.String("m", "0.0625", "Chance (0-1) the app will ask to repopulate with deadlines and events")
 
 	flag.Parse()
 
 	noOfSlots, _ := strconv.Atoi(*slotsPtr)
+	noOfMeta, _ := strconv.ParseFloat(*metaPtr, 64)
 	inputData := getInput(filePtr, noOfSlots)
 
-	generateTimetable(inputData)
+	generateTimetable(inputData, noOfMeta)
 }
 
 // roundUp rounds a time up to its nearest 30-minute point
