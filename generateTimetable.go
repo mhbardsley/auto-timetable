@@ -19,9 +19,9 @@ type timetableElement struct {
 func generateTimetable(data inputData, noOfMeta float64) {
 	timetable := getEmptyTimetable(data.Deadlines, data.Events, data.slots)
 
-	fillWithMeta(timetable, noOfMeta)
-
 	fillWithEvents(timetable, data.Events)
+
+	fillWithMeta(timetable, noOfMeta)
 
 	fillDeadlines(timetable, data.Deadlines)
 
@@ -32,6 +32,8 @@ func generateTimetable(data inputData, noOfMeta float64) {
 
 	// otherwise, we loop in a random to probabilistic assignment
 	fillTimetable(timetable, data.Deadlines)
+
+	timetable = extendTimetable(timetable, data.slots, noOfMeta)
 	fmt.Printf("%s", printTimetable(timetable, data.slots))
 
 }
@@ -40,10 +42,14 @@ func generateTimetable(data inputData, noOfMeta float64) {
 func getEmptyTimetable(deadlines []deadline, events []event, noOfSlots int) (timetable []timetableElement) {
 	var numberOfSpaces int
 	deadlinesEnd := len(deadlines)
+	eventsEnd := len(events)
 	if deadlinesEnd != 0 {
 		deadlinesEnd = segmentsBetween(currentTime, deadlines[deadlinesEnd-1].Deadline)
 	}
-	numberOfSpaces = int(math.Max(float64(deadlinesEnd), float64(noOfSlots)))
+	if eventsEnd != 0 {
+		eventsEnd = segmentsBetween(currentTime, events[eventsEnd-1].EndTime)
+	}
+	numberOfSpaces = int(math.Max(float64(deadlinesEnd), float64(eventsEnd)))
 	timetable = make([]timetableElement, numberOfSpaces)
 	return timetable
 }
@@ -52,19 +58,6 @@ func getEmptyTimetable(deadlines []deadline, events []event, noOfSlots int) (tim
 func segmentsBetween(time1 time.Time, time2 time.Time) int {
 	durationBetween := time2.Sub(time1)
 	return (int)(durationBetween.Minutes() / 30)
-}
-
-func fillWithMeta(timetable []timetableElement, noOfMeta float64) {
-	var r *rand.Rand
-	var generated float64
-
-	for i := range timetable {
-		r = rand.New(rand.NewSource(currentTime.Add(time.Duration(i*30)*time.Minute).Unix() / 1800))
-		generated = r.Float64()
-		if generated < noOfMeta {
-			timetable[i].meta = true
-		}
-	}
 }
 
 // fill the timetable with the events now they are assumed to be correct
@@ -82,6 +75,26 @@ func fillWithEvents(timetable []timetableElement, events []event) {
 		selectedElements = timetable[startIndex:endIndex]
 		for j := range selectedElements {
 			selectedElements[j].event = &(events[i].Name)
+		}
+	}
+}
+
+func fillWithMeta(timetable []timetableElement, noOfMeta float64) {
+	var r *rand.Rand
+	var generated float64
+
+	totalFreeSlots := freeSlotsBetween(timetable)
+	totalSlots := len(timetable)
+
+	ratio := noOfMeta * float64(totalSlots) / float64(totalFreeSlots)
+
+	for i := range timetable {
+		if timetable[i].event == nil {
+			r = rand.New(rand.NewSource(currentTime.Add(time.Duration(i*30)*time.Minute).Unix() / 1800))
+			generated = r.Float64()
+			if generated < ratio {
+				timetable[i].meta = true
+			}
 		}
 	}
 }
@@ -126,26 +139,36 @@ func freeSlotsBetween(timetablePart []timetableElement) int {
 	return count
 }
 
+// function to extend the timetable, if need-be, to the number of slots given
+func extendTimetable(timetable []timetableElement, noOfSlots int, noOfMeta float64) []timetableElement {
+	if noOfSlots <= len(timetable) {
+		return timetable
+	}
+	// otherwise, make the slice
+	extraPart := make([]timetableElement, noOfSlots-len(timetable))
+	fillWithMeta(extraPart, noOfMeta)
+	return append(timetable, extraPart...)
+}
+
 // function to print the timetable as-is
 func printTimetable(timetable []timetableElement, noOfSlots int) string {
 	builder := strings.Builder{}
 	for i := 0; i < noOfSlots; i++ {
-		if i > noOfSlots {
-			break
-		}
 		switch {
-		case timetable[i].meta:
-			builder.WriteString(fmt.Sprintf("%s-%s: [META] Fill in events and deadlines (even if you cannot do so in this time slot, you must arrange to do this at some point)", (currentTime.Add(time.Duration(i*30) * time.Minute)).Format("Jan 2 15:04"), (currentTime.Add(time.Duration((i+1)*30) * time.Minute)).Format("Jan 2 15:04")))
 		case timetable[i].event != nil:
 			builder.WriteString(fmt.Sprintf("%s-%s: ", (currentTime.Add(time.Duration(i*30) * time.Minute)).Format("Jan 2 15:04"), (currentTime.Add(time.Duration((i+1)*30) * time.Minute)).Format("Jan 2 15:04")))
 			builder.WriteString(fmt.Sprintf("[EVENT] %s", *(timetable[i].event)))
+		case timetable[i].meta:
+			builder.WriteString(fmt.Sprintf("%s-%s: [META] Fill in events and deadlines", (currentTime.Add(time.Duration(i*30) * time.Minute)).Format("Jan 2 15:04"), (currentTime.Add(time.Duration((i+1)*30) * time.Minute)).Format("Jan 2 15:04")))
+			builder.WriteString(fmt.Sprintln())
+			builder.WriteString(fmt.Sprintf("%s-%s: 5 minute break", (currentTime.Add(time.Duration((i+1)*30-5) * time.Minute)).Format("Jan 2 15:04"), (currentTime.Add(time.Duration((i+1)*30) * time.Minute)).Format("Jan 2 15:04")))
 		case timetable[i].deadline != nil:
 			builder.WriteString(fmt.Sprintf("%s-%s: ", (currentTime.Add(time.Duration(i*30) * time.Minute)).Format("Jan 2 15:04"), (currentTime.Add(time.Duration((i+1)*30-5) * time.Minute)).Format("Jan 2 15:04")))
 			builder.WriteString(fmt.Sprintf("[DEADLINE] %s", *(timetable[i].deadline)))
 			builder.WriteString(fmt.Sprintln())
 			builder.WriteString(fmt.Sprintf("%s-%s: 5 minute break", (currentTime.Add(time.Duration((i+1)*30-5) * time.Minute)).Format("Jan 2 15:04"), (currentTime.Add(time.Duration((i+1)*30) * time.Minute)).Format("Jan 2 15:04")))
 		default:
-			builder.WriteString(fmt.Sprintf("%s-%s: FREE SLOT - please populate with deadlines and events", (currentTime.Add(time.Duration(i*30) * time.Minute)).Format("Jan 2 15:04"), (currentTime.Add(time.Duration((i+1)*30) * time.Minute)).Format("Jan 2 15:04")))
+			builder.WriteString(fmt.Sprintf("%s-%s: FREE SLOT", (currentTime.Add(time.Duration(i*30) * time.Minute)).Format("Jan 2 15:04"), (currentTime.Add(time.Duration((i+1)*30) * time.Minute)).Format("Jan 2 15:04")))
 		}
 		builder.WriteString(fmt.Sprintln())
 	}

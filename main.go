@@ -14,7 +14,7 @@ func main() {
 	rand.Seed(currentTime.Unix())
 	filePtr := flag.String("f", "input.json", "The input's filename")
 	slotsPtr := flag.String("s", "48", "The number of slots to display")
-	metaPtr := flag.String("m", "0.0625", "Chance (0-1) the app will ask to repopulate with deadlines and events")
+	metaPtr := flag.String("m", "0.0625", "Base chance (0-1) the app will ask to repopulate with deadlines and events")
 
 	flag.Parse()
 
