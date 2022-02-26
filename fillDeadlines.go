@@ -21,7 +21,7 @@ func hasFilled(timetable []timetableElement, deadlines []deadline, pow int) bool
 	var chosenIndex int
 	deadlinesCopy := copyDeadlines(deadlines)
 	for i, slot := range timetable {
-		if slot.event == nil && !slot.meta && len(deadlinesCopy) > 0 {
+		if slot.event == nil && len(deadlinesCopy) > 0 {
 			weights := getWeights(deadlinesCopy, pow)
 			cumulateWeights(weights)
 			r := rand.Float64() * weights[len(weights)-1]
