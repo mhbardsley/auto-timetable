@@ -14,13 +14,15 @@ func main() {
 	rand.Seed(currentTime.Unix())
 	filePtr := flag.String("f", "input.json", "The input's filename")
 	slotsPtr := flag.String("s", "48", "The number of slots to display")
+	repopulatePtr := flag.String("r", "0.04", "Repopulation threshold")
 
 	flag.Parse()
 
 	noOfSlots, _ := strconv.Atoi(*slotsPtr)
+	threshold, _ := strconv.ParseFloat(*repopulatePtr, 64)
 	inputData := getInput(filePtr, noOfSlots)
 
-	generateTimetable(inputData)
+	generateTimetable(inputData, threshold)
 }
 
 // roundUp rounds a time up to its nearest 30-minute point

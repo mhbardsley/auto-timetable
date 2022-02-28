@@ -10,9 +10,10 @@ import (
 )
 
 type event struct {
-	Name      string    `json:"name"`
-	StartTime time.Time `json:"startTime"`
-	EndTime   time.Time `json:"endTime"`
+	Name       string    `json:"name,omitempty"`
+	Repopulate bool      `json:"repopulate,omitempty"`
+	StartTime  time.Time `json:"startTime"`
+	EndTime    time.Time `json:"endTime"`
 }
 
 type deadline struct {
@@ -92,6 +93,13 @@ func checkEvents(events []event) {
 	// data are sorted, so check first event
 	if events[0].EndTime.Before(currentTime) {
 		log.Fatalf("found an event %s that has already passed", events[0].Name)
+	}
+
+	// check that the event has a name or is to repopulate
+	for _, event := range events {
+		if event.Name == "" && !event.Repopulate {
+			log.Fatalf("found an event that has neither a name nor is a repopulation")
+		}
 	}
 
 	// check every event's start time is before the end time

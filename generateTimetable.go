@@ -9,15 +9,19 @@ import (
 )
 
 type timetableElement struct {
-	event    *string
-	deadline *string
+	event    *event
+	deadline *deadline
 }
 
 // function to generate the timetable
-func generateTimetable(data inputData) {
+func generateTimetable(data inputData, threshold float64) {
 	timetable := getEmptyTimetable(data.Deadlines, data.Events, data.slots)
 
 	fillWithEvents(timetable, data.Events)
+
+	if !repopulationExceeded(timetable, threshold) {
+		log.Fatalf("You need to add more repopulation events/make more existing events repopulation events")
+	}
 
 	fillDeadlines(timetable, data.Deadlines)
 
@@ -70,9 +74,25 @@ func fillWithEvents(timetable []timetableElement, events []event) {
 		endIndex = int(math.Min(float64(segmentsBetween(currentTime, event.EndTime)), float64(len(timetable))))
 		selectedElements = timetable[startIndex:endIndex]
 		for j := range selectedElements {
-			selectedElements[j].event = &(events[i].Name)
+			selectedElements[j].event = &(events[i])
 		}
 	}
+}
+
+// check if the repopulation threshold is being exceeded at any point
+func repopulationExceeded(timetable []timetableElement, threshold float64) bool {
+	slotsTotal := 0
+	slotsRepopulation := 0
+	for _, slot := range timetable {
+		slotsTotal++
+		if slot.event != nil && slot.event.Repopulate {
+			slotsRepopulation++
+		}
+		if float64(slotsRepopulation)/float64(slotsTotal) > threshold {
+			return true
+		}
+	}
+	return false
 }
 
 // function to fill deadlines with how many remain and are available
@@ -130,12 +150,18 @@ func printTimetable(timetable []timetableElement, noOfSlots int) string {
 	builder := strings.Builder{}
 	for i := 0; i < noOfSlots; i++ {
 		switch {
+		case timetable[i].event != nil && timetable[i].event.Repopulate && timetable[i].event.Name != "":
+			builder.WriteString(fmt.Sprintf("%s-%s: ", (currentTime.Add(time.Duration(i*30) * time.Minute)).Format("Jan 2 15:04"), (currentTime.Add(time.Duration((i+1)*30) * time.Minute)).Format("Jan 2 15:04")))
+			builder.WriteString(fmt.Sprintf("{REPOPULATE DEADLINES, [EVENT] %s}", timetable[i].event.Name))
+		case timetable[i].event != nil && timetable[i].event.Repopulate:
+			builder.WriteString(fmt.Sprintf("%s-%s: ", (currentTime.Add(time.Duration(i*30) * time.Minute)).Format("Jan 2 15:04"), (currentTime.Add(time.Duration((i+1)*30) * time.Minute)).Format("Jan 2 15:04")))
+			builder.WriteString("REPOPULATE DEADLINES")
 		case timetable[i].event != nil:
 			builder.WriteString(fmt.Sprintf("%s-%s: ", (currentTime.Add(time.Duration(i*30) * time.Minute)).Format("Jan 2 15:04"), (currentTime.Add(time.Duration((i+1)*30) * time.Minute)).Format("Jan 2 15:04")))
-			builder.WriteString(fmt.Sprintf("[EVENT] %s", *(timetable[i].event)))
+			builder.WriteString(fmt.Sprintf("[EVENT] %s", timetable[i].event.Name))
 		case timetable[i].deadline != nil:
 			builder.WriteString(fmt.Sprintf("%s-%s: ", (currentTime.Add(time.Duration(i*30) * time.Minute)).Format("Jan 2 15:04"), (currentTime.Add(time.Duration((i+1)*30-5) * time.Minute)).Format("Jan 2 15:04")))
-			builder.WriteString(fmt.Sprintf("[DEADLINE] %s", *(timetable[i].deadline)))
+			builder.WriteString(fmt.Sprintf("[DEADLINE] %s", timetable[i].deadline.Name))
 			builder.WriteString(fmt.Sprintln())
 			builder.WriteString(fmt.Sprintf("%s-%s: 5 minute break", (currentTime.Add(time.Duration((i+1)*30-5) * time.Minute)).Format("Jan 2 15:04"), (currentTime.Add(time.Duration((i+1)*30) * time.Minute)).Format("Jan 2 15:04")))
 		default:
