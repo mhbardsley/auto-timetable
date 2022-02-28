@@ -26,8 +26,8 @@ func generateTimetable(data inputData, threshold float64) {
 	fillDeadlines(timetable, data.Deadlines)
 
 	// if a timetabling is not possible, stop
-	if time, possible := possibleTimetabling(data.Deadlines); !possible {
-		log.Fatalf("There's too little time to do everything before %s! Please reduce the number of events or deadlines or extend them", time.Format("Jan 2 15:04"))
+	if time, slots, possible := possibleTimetabling(data.Deadlines); !possible {
+		log.Fatalf("There's too little time to do everything before %s! Please reduce the number of events or deadlines or extend them to free at least %d slots", time.Format("Jan 2 15:04"), slots)
 	}
 
 	// otherwise, we loop in a random to probabilistic assignment
@@ -113,15 +113,15 @@ func fillDeadlines(timetable []timetableElement, deadlines []deadline) {
 }
 
 // check that a timetabling is possible
-func possibleTimetabling(deadlines []deadline) (noFit time.Time, possible bool) {
+func possibleTimetabling(deadlines []deadline) (noFit time.Time, slotsToReduce int, possible bool) {
 	runningTotal := 0
 	for _, deadline := range deadlines {
 		runningTotal += deadline.slotsRemaining
 		if runningTotal > deadline.slotsAvailable {
-			return deadline.Deadline, false
+			return deadline.Deadline, (runningTotal - deadline.slotsAvailable), false
 		}
 	}
-	return noFit, true
+	return noFit, slotsToReduce, true
 }
 
 // calculate the number of free slots in the timetable slice

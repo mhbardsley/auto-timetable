@@ -33,7 +33,7 @@ func hasFilled(timetable []timetableElement, deadlines []deadline, pow int) bool
 			}
 			timetable[i].deadline = &(deadlinesCopy[chosenIndex])
 			deadlinesCopy = reduceDeadlines(deadlinesCopy, chosenIndex)
-			if _, possible := possibleTimetabling(deadlinesCopy); !possible {
+			if _, _, possible := possibleTimetabling(deadlinesCopy); !possible {
 				return false
 			}
 		}
