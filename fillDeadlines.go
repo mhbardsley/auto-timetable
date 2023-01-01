@@ -52,7 +52,7 @@ func copyDeadlines(deadlines []deadline) (deadlinesCopy []deadline) {
 func getWeights(deadlines []deadline, pow int) (weights []float64) {
 	weights = make([]float64, len(deadlines))
 	for i, deadline := range deadlines {
-		weights[i] = math.Pow(float64(deadline.slotsRemaining)/float64(deadline.slotsAvailable), float64(pow))
+		weights[i] = float64(deadline.slotsRemaining) / math.Pow(float64(deadline.slotsAvailable), float64(pow))
 	}
 	return weights
 }

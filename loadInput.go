@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"os"
 	"log"
 	"math"
 	"sort"
@@ -32,7 +32,7 @@ type inputData struct {
 
 // this function will read the JSON file into the structs
 func getInput(filePtr *string, noOfSlots int) (data inputData) {
-	dataRaw, err := ioutil.ReadFile(*filePtr)
+	dataRaw, err := os.ReadFile(*filePtr)
 	if err != nil {
 		log.Fatal("error opening file: ", err)
 	}
