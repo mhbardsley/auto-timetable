@@ -1,4 +1,4 @@
-package main
+package backend
 
 import (
 	"fmt"
@@ -13,8 +13,8 @@ type timetableElement struct {
 	deadline *deadline
 }
 
-// function to generate the timetable
-func generateTimetable(data inputData, threshold float64) {
+// GenerateTimetable is the function to generate the timetable
+func GenerateTimetable(data inputData, threshold float64) {
 	timetable := getEmptyTimetable(data.Deadlines, data.Events, data.slots)
 
 	fillWithEvents(timetable, data.Events)

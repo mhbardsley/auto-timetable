@@ -1,4 +1,4 @@
-package main
+package backend
 
 import (
 	"encoding/json"
@@ -30,8 +30,8 @@ type inputData struct {
 	slots     int        `json:"-"`
 }
 
-// this function will read the JSON file into the structs
-func getInput(filePtr *string, noOfSlots int) (data inputData) {
+// GetInput is the function will read the JSON file into the structs
+func GetInput(filePtr *string, noOfSlots int) (data inputData) {
 	dataRaw, err := os.ReadFile(*filePtr)
 	if err != nil {
 		log.Fatal("error opening file: ", err)
@@ -126,4 +126,18 @@ func checkDeadlines(deadlines []deadline) {
 	if len(deadlines) > 0 && deadlines[0].Deadline.Before(currentTime) {
 		log.Fatalf("found a deadline %s that has already passed", deadlines[0].Name)
 	}
+}
+
+// roundUp rounds a time up to its nearest 30-minute point
+func roundUp(unrounded time.Time) (rounded time.Time) {
+	rounded = unrounded.Truncate(30 * time.Minute)
+	if unrounded == rounded {
+		return rounded
+	}
+	return rounded.Add(30 * time.Minute)
+}
+
+// roundDown rounds a time down to its nearest 30-minute point
+func roundDown(unrounded time.Time) time.Time {
+	return unrounded.Truncate(30 * time.Minute)
 }
