@@ -1,44 +1,47 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"os"
-	"strconv"
 
 	"github.com/mhbardsley/auto-timetable/backend"
+	"github.com/spf13/cobra"
 )
 
 func main() {
-	flag.Usage = func() {
-		fmt.Println("Usage: auto-timetable <subcommand> [flags]")
-		fmt.Println("subcommands:")
-		fmt.Println("  generate - generate a timetable")
-		fmt.Println("  help - display this help")
-	}
-	flag.Parse()
-	args := flag.Args()
-	if len(args) == 0 {
-		flag.Usage()
-		os.Exit(1)
+	var rootCmd = &cobra.Command{
+		Use:   "auto-timetable",
+		Short: "Time management program",
+		Long:  `Time management program that allows you to generate a timetbale.`,
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Println("Usage: auto-timetable <subcommand> [flags]")
+			fmt.Println("subcommands:")
+			fmt.Println("  generate - generate a timetable")
+			fmt.Println("  help - display this help")
+		},
 	}
 
-	switch os.Args[1] {
-	case "generate":
-		generateCmd := flag.NewFlagSet("generate", flag.ExitOnError)
-		filePtr := generateCmd.String("f", "input.json", "The input's filename")
-		slotsPtr := generateCmd.String("s", "48", "The number of slots to display")
-		repopulatePtr := generateCmd.String("r", "0.04", "Repopulation threshold")
-		generateCmd.Parse(args[1:])
-		noOfSlots, _ := strconv.Atoi(*slotsPtr)
-		threshold, _ := strconv.ParseFloat(*repopulatePtr, 64)
-		inputData := backend.GetInput(filePtr, noOfSlots)
-		backend.GenerateTimetable(inputData, threshold)
-	case "help":
-		flag.Usage()
-	default:
-		fmt.Printf("%q is not valid subcommand.\n", args[0])
-		flag.Usage()
+	var generateCmd = &cobra.Command{
+		Use:   "generate",
+		Short: "Generate a timetable",
+		Long:  `Generate a timetable from input data`,
+		Run: func(cmd *cobra.Command, args []string) {
+			fileName, _ := cmd.Flags().GetString("file")
+			noOfSlots, _ := cmd.Flags().GetInt("slots")
+			threshold, _ := cmd.Flags().GetFloat64("threshold")
+			inputData := backend.GetInput(&fileName, noOfSlots)
+			backend.GenerateTimetable(inputData, threshold)
+		},
+	}
+
+	generateCmd.Flags().StringP("file", "f", "input.json", "The input's filename")
+	generateCmd.Flags().IntP("slots", "s", 48, "The number of slots to display")
+	generateCmd.Flags().Float64P("threshold", "r", 0.04, "Repopulation threshold")
+
+	rootCmd.AddCommand(generateCmd)
+
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Println(err)
 		os.Exit(1)
 	}
 }
