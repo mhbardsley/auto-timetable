@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/mhbardsley/auto-timetable/backend"
+	"github.com/mhbardsley/auto-timetable/cli"
 	"github.com/spf13/cobra"
 )
 
@@ -17,6 +18,7 @@ func main() {
 			fmt.Println("Usage: auto-timetable <subcommand> [flags]")
 			fmt.Println("subcommands:")
 			fmt.Println("  generate - generate a timetable")
+			fmt.Println("  add - add an event or deadline")
 			fmt.Println("  help - display this help")
 		},
 	}
@@ -38,7 +40,20 @@ func main() {
 	generateCmd.Flags().IntP("slots", "s", 48, "The number of slots to display")
 	generateCmd.Flags().Float64P("threshold", "r", 0.04, "Repopulation threshold")
 
+	var addCmd = &cobra.Command{
+		Use:   "add",
+		Short: "Add an event or deadline",
+		Long:  `Add an event or deadline to the existing timetable`,
+		Run: func(cmd *cobra.Command, args []string) {
+			fileName, _ := cmd.Flags().GetString("file")
+			cli.Add(&fileName)
+		},
+	}
+
+	addCmd.Flags().StringP("file", "f", "input.json", "The input's filename")
+
 	rootCmd.AddCommand(generateCmd)
+	rootCmd.AddCommand(addCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)

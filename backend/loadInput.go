@@ -2,9 +2,9 @@ package backend
 
 import (
 	"encoding/json"
-	"os"
 	"log"
 	"math"
+	"os"
 	"sort"
 	"time"
 )
@@ -37,7 +37,7 @@ func GetInput(filePtr *string, noOfSlots int) (data inputData) {
 		log.Fatal("error opening file: ", err)
 	}
 
-	// unmarshall data into payload
+	// unmarshal data into payload
 	err = json.Unmarshal(dataRaw, &data)
 	if err != nil {
 		log.Fatal("error making sense of input file: ", err)
