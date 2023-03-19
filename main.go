@@ -10,6 +10,7 @@ import (
 )
 
 func main() {
+	// TODO: add parsing by public struct attributes
 	var rootCmd = &cobra.Command{
 		Use:   "auto-timetable",
 		Short: "Time management program",
@@ -61,9 +62,13 @@ func main() {
 		Long:  `Add an event to the existing timetable`,
 		Run: func(cmd *cobra.Command, args []string) {
 			fileName, _ := cmd.Flags().GetString("file")
-			cli.Add(&fileName)
+			cli.AddEvent(&fileName)
 		},
 	}
+
+	eventCmd.Flags().StringP("name", "n", "", "Name of the event")
+	eventCmd.Flags().BoolP("repopulate", "r", false, "Event is repopulation")
+	// TODO: add time parsing
 
 	var deadlineCmd = &cobra.Command{
 		Use:   "deadline",
@@ -71,7 +76,7 @@ func main() {
 		Long:  `Add a deadline to the existing timetable`,
 		Run: func(cmd *cobra.Command, args []string) {
 			fileName, _ := cmd.Flags().GetString("file")
-			cli.Add(&fileName)
+			cli.AddDeadline(&fileName)
 		},
 	}
 
