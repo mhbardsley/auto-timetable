@@ -45,12 +45,38 @@ func main() {
 		Short: "Add an event or deadline",
 		Long:  `Add an event or deadline to the existing timetable`,
 		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Println("Usage: auto-timetable add [flags]")
+			fmt.Println("subsubcommands:")
+			fmt.Println("  event - add an event")
+			fmt.Println("  deadline - add a deadline")
+			fmt.Println("  help - display this help")
+		},
+	}
+
+	addCmd.PersistentFlags().StringP("file", "f", "input.json", "The input's filename")
+
+	var eventCmd = &cobra.Command{
+		Use:   "event",
+		Short: "Add an event",
+		Long:  `Add an event to the existing timetable`,
+		Run: func(cmd *cobra.Command, args []string) {
 			fileName, _ := cmd.Flags().GetString("file")
 			cli.Add(&fileName)
 		},
 	}
 
-	addCmd.Flags().StringP("file", "f", "input.json", "The input's filename")
+	var deadlineCmd = &cobra.Command{
+		Use:   "deadline",
+		Short: "Add a deadline",
+		Long:  `Add a deadline to the existing timetable`,
+		Run: func(cmd *cobra.Command, args []string) {
+			fileName, _ := cmd.Flags().GetString("file")
+			cli.Add(&fileName)
+		},
+	}
+
+	addCmd.AddCommand(eventCmd)
+	addCmd.AddCommand(deadlineCmd)
 
 	rootCmd.AddCommand(generateCmd)
 	rootCmd.AddCommand(addCmd)

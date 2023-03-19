@@ -3,6 +3,11 @@ package cli
 import "fmt"
 
 // TODO: implement logic for this
-func Add(_ *string) {
-	fmt.Println("add")
+func AddEvent(_ *string) {
+	fmt.Println("add event")
+}
+
+// TODO: implement logic for this
+func AddDeadline(_ *string) {
+	fmt.Println("add deadline")
 }
