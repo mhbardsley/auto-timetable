@@ -67,8 +67,10 @@ func main() {
 	}
 
 	eventCmd.Flags().StringP("name", "n", "", "Name of the event")
-	eventCmd.Flags().BoolP("repopulate", "r", false, "Event is repopulation")
-	// TODO: add time parsing
+	eventCmd.Flags().BoolP("repopulate", "r", false, Event is repopulation")
+	eventCmd.Flags().StringP("startTime", "s", "", "Start time")
+	eventCmd.Flags().StringP("endTime", "e", "", "End time")
+	// TODO: add flags into the event command
 
 	var deadlineCmd = &cobra.Command{
 		Use:   "deadline",
