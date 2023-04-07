@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/mhbardsley/auto-timetable/backend"
 	"github.com/mhbardsley/auto-timetable/cli"
@@ -61,16 +62,25 @@ func main() {
 		Short: "Add an event",
 		Long:  `Add an event to the existing timetable`,
 		Run: func(cmd *cobra.Command, args []string) {
-			fileName, _ := cmd.Flags().GetString("file")
-			cli.AddEvent(&fileName)
+			eventName, _ := cmd.Flags().GetString("name")
+			repopulate, _ := cmd.Flags().GetBool("repopulate")
+			startTimeStr, _ := cmd.Flags().GetString("startTime")
+			endTimeStr, _ := cmd.Flags().GetString("endTime")
+
+			startTime, _ := time.Parse(time.RFC3339, startTimeStr)
+			endTime, _ := time.Parse(time.RFC3339, endTimeStr)
+			fmt.Print(eventName)
+			fmt.Print(repopulate)
+			fmt.Print(startTime)
+			fmt.Print(endTime)
 		},
 	}
 
 	eventCmd.Flags().StringP("name", "n", "", "Name of the event")
-	eventCmd.Flags().BoolP("repopulate", "r", false, Event is repopulation")
+	eventCmd.Flags().BoolP("repopulate", "r", false, "Event is repopulation")
 	eventCmd.Flags().StringP("startTime", "s", "", "Start time")
 	eventCmd.Flags().StringP("endTime", "e", "", "End time")
-	// TODO: add flags into the event command
+	// TODO: flags in the event command
 
 	var deadlineCmd = &cobra.Command{
 		Use:   "deadline",
