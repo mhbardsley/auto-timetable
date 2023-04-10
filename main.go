@@ -11,7 +11,6 @@ import (
 )
 
 func main() {
-	// TODO: add parsing by public struct attributes
 	var rootCmd = &cobra.Command{
 		Use:   "auto-timetable",
 		Short: "Time management program",
@@ -55,6 +54,7 @@ func main() {
 		},
 	}
 
+	// TODO: replace with StringVarP
 	addCmd.PersistentFlags().StringP("file", "f", "input.json", "The input's filename")
 
 	var eventCmd = &cobra.Command{
