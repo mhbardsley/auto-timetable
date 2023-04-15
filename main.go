@@ -11,7 +11,18 @@ import (
 )
 
 func main() {
-	var rootCmd = &cobra.Command{
+	// recurseively call command-line functions to build up the CLI
+	// in a modular fashion
+	rootCmd := makeRootCommand()
+
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+}
+
+func makeRootCommand() *cobra.Command {
+	rootCmd := &cobra.Command{
 		Use:   "auto-timetable",
 		Short: "Time management program",
 		Long:  `Time management program that allows you to generate a timetbale.`,
@@ -24,7 +35,15 @@ func main() {
 		},
 	}
 
-	var generateCmd = &cobra.Command{
+	rootCmd.AddCommand(makeGenerateCommand())
+	rootCmd.AddCommand(makeAddCommand())
+
+	return rootCmd
+}
+
+
+func makeGenerateCommand() *cobra.Command {
+	generateCmd := &cobra.Command{
 		Use:   "generate",
 		Short: "Generate a timetable",
 		Long:  `Generate a timetable from input data`,
@@ -41,7 +60,13 @@ func main() {
 	generateCmd.Flags().IntP("slots", "s", 48, "The number of slots to display")
 	generateCmd.Flags().Float64P("threshold", "r", 0.04, "Repopulation threshold")
 
-	var addCmd = &cobra.Command{
+	return generateCmd
+}
+
+func makeAddCommand() *cobra.Command {
+	var fileName string
+
+	addCmd := &cobra.Command{
 		Use:   "add",
 		Short: "Add an event or deadline",
 		Long:  `Add an event or deadline to the existing timetable`,
@@ -51,13 +76,21 @@ func main() {
 			fmt.Println("  event - add an event")
 			fmt.Println("  deadline - add a deadline")
 			fmt.Println("  help - display this help")
+
+			fmt.Println(fileName)
 		},
 	}
 
-	// TODO: replace with StringVarP
-	addCmd.PersistentFlags().StringP("file", "f", "input.json", "The input's filename")
+	addCmd.PersistentFlags().StringVarP(&fileName, "file", "f", "input.json", "The input's filename")
 
-	var eventCmd = &cobra.Command{
+	addCmd.AddCommand(makeAddEventCommand())
+	addCmd.AddCommand(makeAddDeadlineCommand())
+
+	return addCmd
+}
+
+func makeAddEventCommand() *cobra.Command {
+	eventCmd := &cobra.Command{
 		Use:   "event",
 		Short: "Add an event",
 		Long:  `Add an event to the existing timetable`,
@@ -76,13 +109,17 @@ func main() {
 		},
 	}
 
+	// TODO: replace with VarPs, writing directly to struct
 	eventCmd.Flags().StringP("name", "n", "", "Name of the event")
 	eventCmd.Flags().BoolP("repopulate", "r", false, "Event is repopulation")
 	eventCmd.Flags().StringP("startTime", "s", "", "Start time")
 	eventCmd.Flags().StringP("endTime", "e", "", "End time")
-	// TODO: flags in the event command
 
-	var deadlineCmd = &cobra.Command{
+	return eventCmd
+}
+
+func makeAddDeadlineCommand() *cobra.Command {
+	deadlineCmd := &cobra.Command{
 		Use:   "deadline",
 		Short: "Add a deadline",
 		Long:  `Add a deadline to the existing timetable`,
@@ -91,15 +128,5 @@ func main() {
 			cli.AddDeadline(&fileName)
 		},
 	}
-
-	addCmd.AddCommand(eventCmd)
-	addCmd.AddCommand(deadlineCmd)
-
-	rootCmd.AddCommand(generateCmd)
-	rootCmd.AddCommand(addCmd)
-
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	return deadlineCmd
 }
