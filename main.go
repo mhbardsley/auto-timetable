@@ -43,22 +43,23 @@ func makeRootCommand() *cobra.Command {
 
 
 func makeGenerateCommand() *cobra.Command {
+	var fileName string
+	var noOfSlots int
+	var threshold float64
+
 	generateCmd := &cobra.Command{
 		Use:   "generate",
 		Short: "Generate a timetable",
 		Long:  `Generate a timetable from input data`,
 		Run: func(cmd *cobra.Command, args []string) {
-			fileName, _ := cmd.Flags().GetString("file")
-			noOfSlots, _ := cmd.Flags().GetInt("slots")
-			threshold, _ := cmd.Flags().GetFloat64("threshold")
 			inputData := backend.GetInput(&fileName, noOfSlots)
 			backend.GenerateTimetable(inputData, threshold)
 		},
 	}
 
-	generateCmd.Flags().StringP("file", "f", "input.json", "The input's filename")
-	generateCmd.Flags().IntP("slots", "s", 48, "The number of slots to display")
-	generateCmd.Flags().Float64P("threshold", "r", 0.04, "Repopulation threshold")
+	generateCmd.Flags().StringVarP(&fileName, "file", "f", "input.json", "The input's filename")
+	generateCmd.Flags().IntVarP(&noOfSlots, "slots", "s", 48, "The number of slots to display")
+	generateCmd.Flags().Float64VarP(&threshold, "threshold", "r", 0.04, "Repopulation threshold")
 
 	return generateCmd
 }
@@ -90,43 +91,52 @@ func makeAddCommand() *cobra.Command {
 }
 
 func makeAddEventCommand() *cobra.Command {
+	var eventName, startTimeStr, endTimeStr string
+	var repopulate bool
+
 	eventCmd := &cobra.Command{
 		Use:   "event",
 		Short: "Add an event",
 		Long:  `Add an event to the existing timetable`,
 		Run: func(cmd *cobra.Command, args []string) {
-			eventName, _ := cmd.Flags().GetString("name")
-			repopulate, _ := cmd.Flags().GetBool("repopulate")
-			startTimeStr, _ := cmd.Flags().GetString("startTime")
-			endTimeStr, _ := cmd.Flags().GetString("endTime")
-
 			startTime, _ := time.Parse(time.RFC3339, startTimeStr)
 			endTime, _ := time.Parse(time.RFC3339, endTimeStr)
-			fmt.Print(eventName)
-			fmt.Print(repopulate)
-			fmt.Print(startTime)
-			fmt.Print(endTime)
+			fmt.Println(eventName)
+			fmt.Println(repopulate)
+			fmt.Println(startTime)
+			fmt.Println(endTime)
 		},
 	}
 
-	// TODO: replace with VarPs, writing directly to struct
-	eventCmd.Flags().StringP("name", "n", "", "Name of the event")
-	eventCmd.Flags().BoolP("repopulate", "r", false, "Event is repopulation")
-	eventCmd.Flags().StringP("startTime", "s", "", "Start time")
-	eventCmd.Flags().StringP("endTime", "e", "", "End time")
+	eventCmd.Flags().StringVarP(&eventName, "name", "n", "", "Name of the event")
+	eventCmd.Flags().BoolVarP(&repopulate, "repopulate", "r", false, "Event is repopulation")
+	eventCmd.Flags().StringVarP(&startTimeStr, "startTime", "s", "", "Start time")
+	eventCmd.Flags().StringVarP(&endTimeStr, "endTime", "e", "", "End time")
 
 	return eventCmd
 }
 
 func makeAddDeadlineCommand() *cobra.Command {
+	var deadlineName, deadlineStr string
+	var minutesRemaining float64
+
 	deadlineCmd := &cobra.Command{
 		Use:   "deadline",
 		Short: "Add a deadline",
 		Long:  `Add a deadline to the existing timetable`,
 		Run: func(cmd *cobra.Command, args []string) {
+			deadline, _ := time.Parse(time.RFC3339, deadlineStr)
 			fileName, _ := cmd.Flags().GetString("file")
 			cli.AddDeadline(&fileName)
+			fmt.Println(deadlineName)
+			fmt.Println(minutesRemaining)
+			fmt.Println(deadline)
 		},
 	}
+
+	deadlineCmd.Flags().StringVarP(&deadlineName, "name", "n", "", "Name of the deadline")
+	deadlineCmd.Flags().Float64VarP(&minutesRemaining, "minutesRemaining", "m", 25.0, "Time to complete deadline")
+	deadlineCmd.Flags().StringVarP(&deadlineStr, "deadline", "d", "", "Time of the deadline")
+
 	return deadlineCmd
 }
