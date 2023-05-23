@@ -101,10 +101,9 @@ func makeAddEventCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			startTime, _ := time.Parse(time.RFC3339, startTimeStr)
 			endTime, _ := time.Parse(time.RFC3339, endTimeStr)
-			fmt.Println(eventName)
-			fmt.Println(repopulate)
-			fmt.Println(startTime)
-			fmt.Println(endTime)
+			fileName, _ := cmd.Flags().GetString("file")
+			// TODO: send via a struct
+			cli.AddEvent(&fileName)
 		},
 	}
 
@@ -127,10 +126,8 @@ func makeAddDeadlineCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			deadline, _ := time.Parse(time.RFC3339, deadlineStr)
 			fileName, _ := cmd.Flags().GetString("file")
+			// TODO: send via a struct
 			cli.AddDeadline(&fileName)
-			fmt.Println(deadlineName)
-			fmt.Println(minutesRemaining)
-			fmt.Println(deadline)
 		},
 	}
 
