@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/mhbardsley/auto-timetable/backend"
 	"github.com/mhbardsley/auto-timetable/cli"
