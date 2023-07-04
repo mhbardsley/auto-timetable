@@ -99,8 +99,6 @@ func makeAddEventCommand() *cobra.Command {
 		Short: "Add an event",
 		Long:  `Add an event to the existing timetable`,
 		Run: func(cmd *cobra.Command, args []string) {
-			startTime, _ := time.Parse(time.RFC3339, startTimeStr)
-			endTime, _ := time.Parse(time.RFC3339, endTimeStr)
 			fileName, _ := cmd.Flags().GetString("file")
 			// TODO: send via a struct
 			cli.AddEvent(&fileName)
@@ -124,7 +122,6 @@ func makeAddDeadlineCommand() *cobra.Command {
 		Short: "Add a deadline",
 		Long:  `Add a deadline to the existing timetable`,
 		Run: func(cmd *cobra.Command, args []string) {
-			deadline, _ := time.Parse(time.RFC3339, deadlineStr)
 			fileName, _ := cmd.Flags().GetString("file")
 			// TODO: send via a struct
 			cli.AddDeadline(&fileName)
