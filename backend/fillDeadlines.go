@@ -2,7 +2,7 @@ package backend
 
 import (
 	"math"
-	"crypto/rand"
+	"math/rand"
 )
 
 // fill the timetable with deadlines probabilistically
