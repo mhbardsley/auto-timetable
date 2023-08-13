@@ -19,10 +19,6 @@ func GenerateTimetable(data inputData, threshold float64) {
 
 	fillWithEvents(timetable, data.Events)
 
-	if !repopulationExceeded(timetable, threshold) {
-		log.Fatalf("You need to add more repopulation events/make more existing events repopulation events")
-	}
-
 	fillDeadlines(timetable, data.Deadlines)
 
 	// if a timetabling is not possible, stop
@@ -77,22 +73,6 @@ func fillWithEvents(timetable []timetableElement, events []event) {
 			selectedElements[j].event = &(events[i])
 		}
 	}
-}
-
-// check if the repopulation threshold is being exceeded at any point
-func repopulationExceeded(timetable []timetableElement, threshold float64) bool {
-	slotsTotal := 0
-	slotsRepopulation := 0
-	for _, slot := range timetable {
-		slotsTotal++
-		if slot.event != nil && slot.event.Repopulate {
-			slotsRepopulation++
-		}
-		if float64(slotsRepopulation)/float64(slotsTotal) > threshold {
-			return true
-		}
-	}
-	return false
 }
 
 // function to fill deadlines with how many remain and are available
@@ -150,12 +130,6 @@ func printTimetable(timetable []timetableElement, noOfSlots int) string {
 	builder := strings.Builder{}
 	for i := 0; i < noOfSlots; i++ {
 		switch {
-		case timetable[i].event != nil && timetable[i].event.Repopulate && timetable[i].event.Name != "":
-			builder.WriteString(fmt.Sprintf("%s-%s: ", (currentTime.Add(time.Duration(i*30) * time.Minute)).Format("Jan 2 15:04"), (currentTime.Add(time.Duration((i+1)*30) * time.Minute)).Format("Jan 2 15:04")))
-			builder.WriteString(fmt.Sprintf("{REPOPULATE DEADLINES, [EVENT] %s}", timetable[i].event.Name))
-		case timetable[i].event != nil && timetable[i].event.Repopulate:
-			builder.WriteString(fmt.Sprintf("%s-%s: ", (currentTime.Add(time.Duration(i*30) * time.Minute)).Format("Jan 2 15:04"), (currentTime.Add(time.Duration((i+1)*30) * time.Minute)).Format("Jan 2 15:04")))
-			builder.WriteString("REPOPULATE DEADLINES")
 		case timetable[i].event != nil:
 			builder.WriteString(fmt.Sprintf("%s-%s: ", (currentTime.Add(time.Duration(i*30) * time.Minute)).Format("Jan 2 15:04"), (currentTime.Add(time.Duration((i+1)*30) * time.Minute)).Format("Jan 2 15:04")))
 			builder.WriteString(fmt.Sprintf("[EVENT] %s", timetable[i].event.Name))

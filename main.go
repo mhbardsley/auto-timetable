@@ -91,7 +91,6 @@ func makeAddCommand() *cobra.Command {
 
 func makeAddEventCommand() *cobra.Command {
 	var eventName, startTimeStr, endTimeStr string
-	var repopulate bool
 
 	eventCmd := &cobra.Command{
 		Use:   "event",
@@ -105,7 +104,6 @@ func makeAddEventCommand() *cobra.Command {
 	}
 
 	eventCmd.Flags().StringVarP(&eventName, "name", "n", "", "Name of the event")
-	eventCmd.Flags().BoolVarP(&repopulate, "repopulate", "r", false, "Event is repopulation")
 	eventCmd.Flags().StringVarP(&startTimeStr, "startTime", "s", "", "Start time")
 	eventCmd.Flags().StringVarP(&endTimeStr, "endTime", "e", "", "End time")
 

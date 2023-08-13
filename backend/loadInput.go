@@ -7,21 +7,18 @@ import (
 	"os"
 	"sort"
 	"time"
+
+	"github.com/mhbardsley/auto-timetable/types"
 )
 
 type event struct {
-	Name       string    `json:"name,omitempty"`
-	Repopulate bool      `json:"repopulate,omitempty"`
-	StartTime  time.Time `json:"startTime"`
-	EndTime    time.Time `json:"endTime"`
+	types.Event
 }
 
 type deadline struct {
-	Name             string    `json:"name"`
-	MinutesRemaining float64   `json:"minutesRemaining"`
+	types.Deadline
 	slotsRemaining   int       `json:"-"`
 	slotsAvailable   int       `json:"-"`
-	Deadline         time.Time `json:"deadline"`
 }
 
 type inputData struct {
@@ -95,10 +92,10 @@ func checkEvents(events []event) {
 		log.Fatalf("found an event %s that has already passed", events[0].Name)
 	}
 
-	// check that the event has a name or is to repopulate
+	// check that the event has a name
 	for _, event := range events {
-		if event.Name == "" && !event.Repopulate {
-			log.Fatalf("found an event that has neither a name nor is a repopulation")
+		if event.Name == "" {
+			log.Fatalf("found an event with no name")
 		}
 	}
 
