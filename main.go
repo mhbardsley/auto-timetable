@@ -42,7 +42,7 @@ func makeRootCommand() *cobra.Command {
 
 
 func makeGenerateCommand() *cobra.Command {
-	var fileName string
+	var dirName string
 	var noOfSlots int
 	var threshold float64
 
@@ -51,12 +51,12 @@ func makeGenerateCommand() *cobra.Command {
 		Short: "Generate a timetable",
 		Long:  `Generate a timetable from input data`,
 		Run: func(cmd *cobra.Command, args []string) {
-			inputData := backend.GetInput(&fileName, noOfSlots)
+			inputData := backend.GetInput(&dirName, noOfSlots)
 			backend.GenerateTimetable(inputData, threshold)
 		},
 	}
 
-	generateCmd.Flags().StringVarP(&fileName, "file", "f", "input.json", "The input's filename")
+	generateCmd.Flags().StringVarP(&dirName, "dir", "d", "toplevel/", "Toplevel directory")
 	generateCmd.Flags().IntVarP(&noOfSlots, "slots", "s", 48, "The number of slots to display")
 	generateCmd.Flags().Float64VarP(&threshold, "threshold", "r", 0.04, "Repopulation threshold")
 
@@ -64,7 +64,7 @@ func makeGenerateCommand() *cobra.Command {
 }
 
 func makeAddCommand() *cobra.Command {
-	var fileName string
+	var dirName string
 
 	addCmd := &cobra.Command{
 		Use:   "add",
@@ -77,11 +77,11 @@ func makeAddCommand() *cobra.Command {
 			fmt.Println("  deadline - add a deadline")
 			fmt.Println("  help - display this help")
 
-			fmt.Println(fileName)
+			fmt.Println(dirName)
 		},
 	}
 
-	addCmd.PersistentFlags().StringVarP(&fileName, "file", "f", "input.json", "The input's filename")
+	addCmd.PersistentFlags().StringVarP(&dirName, "file", "f", "input.json", "The input's filename")
 
 	addCmd.AddCommand(makeAddEventCommand())
 	addCmd.AddCommand(makeAddDeadlineCommand())
@@ -97,9 +97,9 @@ func makeAddEventCommand() *cobra.Command {
 		Short: "Add an event",
 		Long:  `Add an event to the existing timetable`,
 		Run: func(cmd *cobra.Command, args []string) {
-			fileName, _ := cmd.Flags().GetString("file")
+			dirName, _ := cmd.Flags().GetString("file")
 			// TODO: send via a struct
-			cli.AddEvent(&fileName)
+			cli.AddEvent(&dirName)
 		},
 	}
 
@@ -119,9 +119,9 @@ func makeAddDeadlineCommand() *cobra.Command {
 		Short: "Add a deadline",
 		Long:  `Add a deadline to the existing timetable`,
 		Run: func(cmd *cobra.Command, args []string) {
-			fileName, _ := cmd.Flags().GetString("file")
+			dirName, _ := cmd.Flags().GetString("file")
 			// TODO: send via a struct
-			cli.AddDeadline(&fileName)
+			cli.AddDeadline(&dirName)
 		},
 	}
 

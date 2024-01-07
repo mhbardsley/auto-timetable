@@ -3,13 +3,13 @@ package types
 import "time"
 
 type Event struct {
-	Name       string    `json:"name,omitempty"`
-	StartTime  time.Time `json:"startTime"`
-	EndTime    time.Time `json:"endTime"`
+	Name       string    `json:"name,omitempty" toml:"name"`
+	StartTime  time.Time `json:"startTime" toml:"startTime"`
+	EndTime    time.Time `json:"endTime" toml:"startTime"`
 }
 
 type Deadline struct {
-	Name             string    `json:"name"`
-	MinutesRemaining float64   `json:"minutesRemaining"`
-	Deadline         time.Time `json:"deadline"`
+	Name             string    `json:"name" toml:"name"`
+	MinutesRemaining float64   `json:"minutesRemaining" toml:"minutesRemaining"`
+	DeadlineTime         time.Time `json:"deadline" toml:"deadline"`
 }

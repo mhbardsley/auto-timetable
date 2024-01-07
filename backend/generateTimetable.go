@@ -40,7 +40,7 @@ func getEmptyTimetable(deadlines []deadline, events []event, noOfSlots int) (tim
 	deadlinesEnd := len(deadlines)
 	eventsEnd := len(events)
 	if deadlinesEnd != 0 {
-		deadlinesEnd = segmentsBetween(currentTime, deadlines[deadlinesEnd-1].Deadline)
+		deadlinesEnd = segmentsBetween(currentTime, deadlines[deadlinesEnd-1].DeadlineTime)
 	}
 	if eventsEnd != 0 {
 		eventsEnd = segmentsBetween(currentTime, events[eventsEnd-1].EndTime)
@@ -84,7 +84,7 @@ func fillDeadlines(timetable []timetableElement, deadlines []deadline) {
 	runningTotal := 0
 	for i, deadline := range deadlines {
 		deadlines[i].slotsRemaining = int(deadline.MinutesRemaining / 25)
-		endIndex = segmentsBetween(currentTime, deadline.Deadline)
+		endIndex = segmentsBetween(currentTime, deadline.DeadlineTime)
 		currentSlots = freeSlotsBetween(timetable[startIndex:endIndex])
 		runningTotal += currentSlots
 		deadlines[i].slotsAvailable = runningTotal
@@ -98,7 +98,7 @@ func possibleTimetabling(deadlines []deadline) (noFit time.Time, slotsToReduce i
 	for _, deadline := range deadlines {
 		runningTotal += deadline.slotsRemaining
 		if runningTotal > deadline.slotsAvailable {
-			return deadline.Deadline, (runningTotal - deadline.slotsAvailable), false
+			return deadline.DeadlineTime, (runningTotal - deadline.slotsAvailable), false
 		}
 	}
 	return noFit, slotsToReduce, true

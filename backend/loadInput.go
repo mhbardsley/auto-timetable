@@ -1,14 +1,17 @@
 package backend
 
 import (
-	"encoding/json"
-	"log"
+	"fmt"
+	"io/fs"
 	"math"
 	"os"
+	"path/filepath"
 	"sort"
 	"time"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/mhbardsley/auto-timetable/types"
+	"github.com/pelletier/go-toml/v2"
 )
 
 type event struct {
@@ -22,27 +25,70 @@ type deadline struct {
 }
 
 type inputData struct {
-	Events    []event    `json:"events"`
-	Deadlines []deadline `json:"deadlines"`
+	Events    []event    `json:"events" toml:"events"`
+	Deadlines []deadline `json:"deadlines" toml:"deadlines"`
 	slots     int        `json:"-"`
 }
 
 // GetInput is the function will read the JSON file into the structs
-func GetInput(filePtr *string, noOfSlots int) (data inputData) {
-	dataRaw, err := os.ReadFile(*filePtr)
+func GetInput(dirPtr *string, noOfSlots int) (data inputData) {
+	tomlPaths, err := getTomls(dirPtr)
 	if err != nil {
-		log.Fatal("error opening file: ", err)
+		log.Fatalf("could not find .at.toml config files: %s", err)
 	}
-
-	// unmarshal data into payload
-	err = json.Unmarshal(dataRaw, &data)
+	data, err = tomlsToInputData(tomlPaths)
 	if err != nil {
-		log.Fatal("error making sense of input file: ", err)
+		log.Fatalf("could not find any event or deadline data: %s", err)
 	}
 	sortData(data)
 	checkData(data)
 	data.slots = noOfSlots
 	return data
+}
+
+// getTomls finds all files named .at.toml in the file hierarchy, where filePtr is considered
+// top of the filesystem
+func getTomls(filePtr *string) ([]string, error) {
+	var tomls []string
+	err := filepath.WalkDir(*filePtr, func(s string, d fs.DirEntry, e error) error {
+		if e != nil { return e }
+		if d.Name() == ".at.toml" {
+			tomls = append(tomls, s)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error walking directory: %w", err)
+	}
+	if len(tomls) == 0 {
+		return nil, fmt.Errorf("could not find any files called .at.toml")
+	}
+	return tomls, nil
+}
+
+// tomlsToInputData takes a list of toml files and collects them into inputData ([]events and []deadlines)
+func tomlsToInputData(tomlPaths []string) (inputData, error) {
+	var events []event
+	var deadlines []deadline
+	for _, tomlPath := range tomlPaths {
+		dataRaw, err := os.ReadFile(tomlPath)
+		if err != nil {
+			log.Warnf("could not open toml file %s: %s", tomlPath, err)
+			continue
+		}
+		var localisedInputData inputData
+		err = toml.Unmarshal(dataRaw, &localisedInputData)
+		if err != nil {
+			log.Warnf("could not process toml file %s as valid input data: %s", tomlPath, err)
+			continue
+		}
+		events = append(events, localisedInputData.Events...)
+		deadlines = append(deadlines, localisedInputData.Deadlines...)
+	}
+	if len(events) == 0 && len(deadlines) == 0 {
+		return inputData{}, fmt.Errorf("could not find any events or deadlines")
+	}
+	return inputData{Events: events, Deadlines: deadlines}, nil
 }
 
 // sortData sorts events and deadlines by start date and upcoming date, respectively
@@ -73,10 +119,10 @@ func sortEvents(events []event) {
 func sortDeadlines(deadlines []deadline) {
 	for i, deadline := range deadlines {
 		deadlines[i].MinutesRemaining = math.Ceil(deadline.MinutesRemaining/25) * 25
-		deadlines[i].Deadline = roundDown(deadline.Deadline)
+		deadlines[i].DeadlineTime = roundDown(deadline.DeadlineTime)
 	}
 	sort.Slice(deadlines, func(p, q int) bool {
-		return deadlines[p].Deadline.Before(deadlines[q].Deadline)
+		return deadlines[p].DeadlineTime.Before(deadlines[q].DeadlineTime)
 	})
 }
 
@@ -120,7 +166,7 @@ func checkEvents(events []event) {
 // checkDeadlines will ensure deadlines are in the future
 func checkDeadlines(deadlines []deadline) {
 	// since we assume data are sorted, just check the first deadline
-	if len(deadlines) > 0 && deadlines[0].Deadline.Before(currentTime) {
+	if len(deadlines) > 0 && deadlines[0].DeadlineTime.Before(currentTime) {
 		log.Fatalf("found a deadline %s that has already passed", deadlines[0].Name)
 	}
 }
