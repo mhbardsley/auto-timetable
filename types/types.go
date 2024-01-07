@@ -5,7 +5,7 @@ import "time"
 type Event struct {
 	Name       string    `json:"name,omitempty" toml:"name"`
 	StartTime  time.Time `json:"startTime" toml:"startTime"`
-	EndTime    time.Time `json:"endTime" toml:"startTime"`
+	EndTime    time.Time `json:"endTime" toml:"endTime"`
 }
 
 type Deadline struct {
