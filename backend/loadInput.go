@@ -40,7 +40,6 @@ func GetInput(dirPtr *string, noOfSlots int) (data inputData) {
 	if err != nil {
 		log.Fatalf("could not find any event or deadline data: %s", err)
 	}
-	log.Info(data)
 	sortData(data)
 	checkData(data)
 	data.slots = noOfSlots
