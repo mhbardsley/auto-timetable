@@ -109,6 +109,7 @@ func sortData(data inputData) {
 func checkData(data inputData) {
 	checkEvents(data.Events)
 	checkDeadlines(data.Deadlines)
+	checkPeriodics(data.Periodics)
 }
 
 // sortEvents to sort by start time
@@ -178,6 +179,18 @@ func checkDeadlines(deadlines []deadline) {
 	}
 }
 
+// checkPeriodics will ensure periodics have a positive probability
+func checkPeriodics(periodics []periodic) {
+	for _, periodic := range periodics {
+		// check there is a name
+		if periodic.Name == "" {
+			log.Fatal("found a periodic with no name")
+		}
+		if periodic.Probability <= 0 {
+			log.Fatalf("found a periodic %s with nonpositive probability", periodic.Name)
+		}
+	}
+}
 // roundUp rounds a time up to its nearest 30-minute point
 func roundUp(unrounded time.Time) (rounded time.Time) {
 	rounded = unrounded.Truncate(30 * time.Minute)

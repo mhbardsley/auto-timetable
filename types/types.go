@@ -16,5 +16,5 @@ type Deadline struct {
 
 type Periodic struct {
 	Name             string    `json:"name" toml:"name"`
-	Frequency float64   `json:"frequency" toml:"frequency"`
+	Probability float64   `json:"frequency" toml:"probability"`
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"math/rand"
 	"strings"
 	"time"
 )
@@ -11,11 +12,14 @@ import (
 type timetableElement struct {
 	event    *event
 	deadline *deadline
+	periodics []periodic
 }
 
 // GenerateTimetable is the function to generate the timetable
 func GenerateTimetable(data inputData, threshold float64) {
 	timetable := getEmptyTimetable(data.Deadlines, data.Events, data.slots)
+
+	fillWithPeriodics(timetable, data.Periodics)
 
 	fillWithEvents(timetable, data.Events)
 
@@ -54,6 +58,20 @@ func getEmptyTimetable(deadlines []deadline, events []event, noOfSlots int) (tim
 func segmentsBetween(time1 time.Time, time2 time.Time) int {
 	durationBetween := time2.Sub(time1)
 	return (int)(durationBetween.Minutes() / 30)
+}
+
+// fill the timetable with the periodics
+func fillWithPeriodics(timetable []timetableElement, periodics []periodic) {
+	// for every slot, there is a chance that it will be filled with some periodics
+	for i, timetableElement := range timetable {
+		for _, periodic := range periodics {
+			// If the random number is less than the weight
+			// assuming the probability is the "rate" the periodic occurs each day
+			if rand.Float64() < (periodic.Probability / 48) {
+				timetable[i].periodics = append(timetableElement.periodic, periodic)
+			}
+		}
+	}
 }
 
 // fill the timetable with the events now they are assumed to be correct
@@ -140,6 +158,9 @@ func printTimetable(timetable []timetableElement, noOfSlots int) string {
 			builder.WriteString(fmt.Sprintf("%s-%s: 5 minute break", (currentTime.Add(time.Duration((i+1)*30-5) * time.Minute)).Format("Jan 2 15:04"), (currentTime.Add(time.Duration((i+1)*30) * time.Minute)).Format("Jan 2 15:04")))
 		default:
 			builder.WriteString(fmt.Sprintf("%s-%s: FREE SLOT", (currentTime.Add(time.Duration(i*30) * time.Minute)).Format("Jan 2 15:04"), (currentTime.Add(time.Duration((i+1)*30) * time.Minute)).Format("Jan 2 15:04")))
+		}
+		for _, periodic := range timetable[i].periodics {
+			builder.WriteString(fmt.Sprintf(" ; [PERIODIC] %s", periodic.Name))
 		}
 		builder.WriteString(fmt.Sprintln())
 	}
