@@ -8,8 +8,5 @@ So we need to adapt GetInput so that it will instead take a top-level directory 
 It should still do the sorting, checking, and so on of data. This is simply manipulation of where it loads data from and how it finds the data
 
 So, we should have the following:
-- Be able to extract the same event and deadline information from those auto-timetable config files (50)
-- Migrate current input.json over to the new format (25)
-- Periodic events to become a thing that gets encoded into the config files (25)
 - Migrating the behaviour that selects a periodic event to auto-timetable (50)
 - Remaining reporting changes (25)

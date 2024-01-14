@@ -16,3 +16,9 @@ func TestGetTomls(t *testing.T) {
 	_, err = getTomls(&incorrectTestData)
 	assert.Error(t, err)
 }
+
+func TestTomlsToInputData(t *testing.T) {
+	correctTomlPaths := []string{"testdata/.at.toml", "testdata/foldera/.at.toml", "testdata/folderb/folderc/.at.toml"}
+	_, err := tomlsToInputData(correctTomlPaths)
+	assert.Error(t, err)
+}

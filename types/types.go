@@ -13,3 +13,8 @@ type Deadline struct {
 	MinutesRemaining float64   `json:"minutesRemaining" toml:"minutesRemaining"`
 	DeadlineTime         time.Time `json:"deadline" toml:"deadline"`
 }
+
+type Periodic struct {
+	Name             string    `json:"name" toml:"name"`
+	Frequency float64   `json:"frequency" toml:"frequency"`
+}

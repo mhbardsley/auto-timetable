@@ -24,9 +24,14 @@ type deadline struct {
 	slotsAvailable   int       `json:"-"`
 }
 
+type periodic struct {
+	types.Periodic
+}
+
 type inputData struct {
 	Events    []event    `json:"events" toml:"events"`
 	Deadlines []deadline `json:"deadlines" toml:"deadlines"`
+	Periodics []periodic `json:"periodic" toml:"periodics"`
 	slots     int        `json:"-"`
 }
 
@@ -38,7 +43,7 @@ func GetInput(dirPtr *string, noOfSlots int) (data inputData) {
 	}
 	data, err = tomlsToInputData(tomlPaths)
 	if err != nil {
-		log.Fatalf("could not find any event or deadline data: %s", err)
+		log.Fatalf("could not find any event, deadline, or periodic data: %s", err)
 	}
 	sortData(data)
 	checkData(data)
@@ -70,6 +75,7 @@ func getTomls(filePtr *string) ([]string, error) {
 func tomlsToInputData(tomlPaths []string) (inputData, error) {
 	var events []event
 	var deadlines []deadline
+	var periodics []periodic
 	for _, tomlPath := range tomlPaths {
 		dataRaw, err := os.ReadFile(tomlPath)
 		if err != nil {
@@ -84,11 +90,12 @@ func tomlsToInputData(tomlPaths []string) (inputData, error) {
 		}
 		events = append(events, localisedInputData.Events...)
 		deadlines = append(deadlines, localisedInputData.Deadlines...)
+		periodics = append(periodics, localisedInputData.Periodics...)
 	}
 	if len(events) == 0 && len(deadlines) == 0 {
 		return inputData{}, fmt.Errorf("could not find any events or deadlines")
 	}
-	return inputData{Events: events, Deadlines: deadlines}, nil
+	return inputData{Events: events, Deadlines: deadlines, Periodics: periodics}, nil
 }
 
 // sortData sorts events and deadlines by start date and upcoming date, respectively
