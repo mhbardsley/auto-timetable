@@ -68,7 +68,7 @@ func fillWithPeriodics(timetable []timetableElement, periodics []periodic) {
 			// If the random number is less than the weight
 			// assuming the probability is the "rate" the periodic occurs each day
 			if rand.Float64() < (periodic.Probability / 48) {
-				timetable[i].periodics = append(timetableElement.periodic, periodic)
+				timetable[i].periodics = append(timetableElement.periodics, periodic)
 			}
 		}
 	}
