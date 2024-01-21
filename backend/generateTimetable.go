@@ -76,7 +76,7 @@ func fillWithPeriodics(timetable []timetableElement, periodics []periodic) {
 }
 
 func deterministicRandom(currentTime time.Time, slotOffset int, periodicName string) float64 {
-	actualTime := currentTime.Add(time.Duration(i*30) * time.Minute)
+	actualTime := currentTime.Add(time.Duration(slotOffset*30) * time.Minute)
 	combinedInput := periodicName + actualTime.Format(time.RFC3339)
 	// Hash the combined input using FNV-1a.
 	h := fnv.New64a()
