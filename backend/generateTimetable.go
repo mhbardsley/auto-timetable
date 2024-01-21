@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"hash/fnv"
 	"fmt"
 	"log"
 	"math"
@@ -67,11 +68,26 @@ func fillWithPeriodics(timetable []timetableElement, periodics []periodic) {
 		for _, periodic := range periodics {
 			// If the random number is less than the weight
 			// assuming the probability is the "rate" the periodic occurs each day
-			if rand.Float64() < (periodic.Probability / 48) {
+			if deterministicRandom(currentTime, i, periodic.Name) < (periodic.Probability / 48) {
 				timetable[i].periodics = append(timetableElement.periodics, periodic)
 			}
 		}
 	}
+}
+
+func deterministicRandom(currentTime time.Time, slotOffset int, periodicName string) float64 {
+	actualTime := currentTime.Add(time.Duration(i*30) * time.Minute)
+	combinedInput := periodicName + actualTime.Format(time.RFC3339)
+	// Hash the combined input using FNV-1a.
+	h := fnv.New64a()
+	h.Write([]byte(combinedInput))
+	combinedHash := h.Sum64()
+
+	// Seed the random number generator with the combined hash.
+	rng := rand.New(rand.NewSource(int64(combinedHash)))
+
+	// Generate a random float64.
+	return rng.Float64()
 }
 
 // fill the timetable with the events now they are assumed to be correct

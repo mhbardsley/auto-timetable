@@ -1,8 +1,11 @@
 # auto-timetable
 Stochastic timetabling algorithm
 
-## Adding support for deadlines and events
-GetInput is the function that takes the "file" and converts it to an inputData type, which is exactly what we want
+## Supported types of slot
+auto-timetable is capable of dealing with one-off events, deadlines, and periodics.
 
-So we need to adapt GetInput so that it will instead take a top-level directory location, and recurse on that to extract any events or deadlines
-It should still do the sorting, checking, and so on of data. This is simply manipulation of where it loads data from and how it finds the data
+One-off events have a prescribed start and end time, and they only exist between those times.
+
+Deadlines have a prescribed end time, and an estimated number of minutes to achieve the deadline. The idea is that they will be scheduled as evenly as possible.
+
+Periodics are events that can happen whenever, but they continue indefinitely.
